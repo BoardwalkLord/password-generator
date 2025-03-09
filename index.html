@@ -121,17 +121,66 @@
       document.getElementById('copyButton').addEventListener('click', function() {
         const passwordText = document.getElementById('passwordDisplay').innerText;
         if (navigator && 'clipboard' in navigator && typeof navigator.clipboard.writeText === 'function') {
-          navigator.clipboard.writeText(passwordText).then(() => {
+          try {
+            navigator.clipboard.writeText(passwordText).then(() => {
+              this.innerHTML = "Copied!";
+              setTimeout(() => {
+                this.innerHTML = "Copy";
+              }, 1000);
+            }).catch(() => {
+              // Fallback to execCommand if Clipboard API fails
+              const passwordElement = document.getElementById('passwordDisplay');
+              const range = document.createRange();
+              range.selectNode(passwordElement);
+              window.getSelection().removeAllRanges();
+              window.getSelection().addRange(range);
+              try {
+                document.execCommand('copy');
+                this.innerHTML = "Copied!";
+                setTimeout(() => {
+                  this.innerHTML = "Copy";
+                }, 1000);
+              } catch (error) {
+                console.error('Failed to copy using execCommand: ', error);
+                alert("Failed to copy password to clipboard.");
+              }
+            });
+          } catch (error) {
+            console.error('Failed to copy using Clipboard API: ', error);
+            // Fallback to execCommand
+            const passwordElement = document.getElementById('passwordDisplay');
+            const range = document.createRange();
+            range.selectNode(passwordElement);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            try {
+              document.execCommand('copy');
+              this.innerHTML = "Copied!";
+              setTimeout(() => {
+                this.innerHTML = "Copy";
+              }, 1000);
+            } catch (error) {
+              console.error('Failed to copy using execCommand: ', error);
+              alert("Failed to copy password to clipboard.");
+            }
+          }
+        } else {
+          // Clipboard API not supported, use execCommand
+          const passwordElement = document.getElementById('passwordDisplay');
+          const range = document.createRange();
+          range.selectNode(passwordElement);
+          window.getSelection().removeAllRanges();
+          window.getSelection().addRange(range);
+          try {
+            document.execCommand('copy');
             this.innerHTML = "Copied!";
             setTimeout(() => {
               this.innerHTML = "Copy";
             }, 1000);
-          }).catch((error) => {
-            console.error('Failed to copy: ', error);
+          } catch (error) {
+            console.error('Failed to copy using execCommand: ', error);
             alert("Failed to copy password to clipboard.");
-          });
-        } else {
-          alert("Copy functionality is not supported in this browser.");
+          }
         }
       });
     </script>
