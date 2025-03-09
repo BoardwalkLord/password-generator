@@ -1,6 +1,21 @@
 <html>
   <head>
     <title>Password Generator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      form {
+        margin-bottom: 20px;
+      }
+      #passwordDisplay {
+        font-size: 1.2em;
+        margin-top: 10px;
+      }
+      #copyButton {
+        margin-left: 10px;
+      }
+    </style>
   </head>
   <body>
     <h1>Password Generator</h1>
@@ -22,7 +37,8 @@
       <br>
       <button type="button" id="generateButton">Generate Password</button>
     </form>
-    <p id="passwordDisplay"></p><button id="copyButton" disabled>Copy</button>
+    <p id="passwordDisplay"></p>
+    <button id="copyButton" disabled>Copy</button>
     <script>
       const lowercase = 'abcdefghijklmnopqrstuvwxyz';
       const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -92,6 +108,31 @@
         let includeSpecial = document.getElementById('includeSpecial').checked;
         let password = generatePassword(length, includeLower, includeUpper, includeNumbers, includeSpecial);
         document.getElementById('passwordDisplay').innerText = password;
+        
+        // Enable or disable copy button based on password validity
+        const copyButton = document.getElementById('copyButton');
+        if (password.startsWith("Error:")) {
+          copyButton.setAttribute("disabled", true);
+        } else {
+          copyButton.removeAttribute("disabled");
+        }
+      });
+
+      document.getElementById('copyButton').addEventListener('click', function() {
+        const passwordText = document.getElementById('passwordDisplay').innerText;
+        if (navigator && 'clipboard' in navigator && typeof navigator.clipboard.writeText === 'function') {
+          navigator.clipboard.writeText(passwordText).then(() => {
+            this.innerHTML = "Copied!";
+            setTimeout(() => {
+              this.innerHTML = "Copy";
+            }, 1000);
+          }).catch((error) => {
+            console.error('Failed to copy: ', error);
+            alert("Failed to copy password to clipboard.");
+          });
+        } else {
+          alert("Copy functionality is not supported in this browser.");
+        }
       });
     </script>
   </body>
